@@ -1,7 +1,7 @@
 <div id="theList" class="container mt-4">
   <div class="card shadow-sm">
     <div class="card-body">
-      <h2 class="card-title">Reservation List</h2>
+      <h2 class="card-title text-center">Reservation List</h2>
 
       <!-- Header row -->
       <div class="row font-weight-bold text-center border-bottom pb-2" style="background-color: #f8f9fa;">
@@ -19,26 +19,36 @@
           <input type="text"
                  [(ngModel)]="reservations[i].location"
                  class="form-control"
-                 required />
+                 name="location{{i}}"
+                 required
+                 #location="ngModel"
+                 [ngClass]="{ 'is-invalid': location.touched && location.invalid }" />
         </div>
 
         <div class="col-2">
           <input type="time"
                  [(ngModel)]="reservations[i].start_time"
                  class="form-control"
-                 required />
+                 name="startTime{{i}}"
+                 required
+                 #startTime="ngModel"
+                 [ngClass]="{ 'is-invalid': startTime.touched && startTime.invalid }" />
         </div>
 
         <div class="col-2">
           <input type="time"
                  [(ngModel)]="reservations[i].end_time"
                  class="form-control"
-                 required />
+                 name="endTime{{i}}"
+                 required
+                 #endTime="ngModel"
+                 [ngClass]="{ 'is-invalid': endTime.touched && endTime.invalid }" />
         </div>
 
         <div class="col-2">
           <input type="checkbox"
-                 [(ngModel)]="reservations[i].reserved" />
+                 [(ngModel)]="reservations[i].reserved"
+                 name="reserved{{i}}" />
           Reserved
         </div>
 
