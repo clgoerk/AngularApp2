@@ -1,0 +1,19 @@
+#theForm, #theList, #links {
+  padding: 10px;
+  border: 2px solid black;
+  margin: 10px;
+}
+
+h2 {
+  font-weight: bold;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #333;
+}
+
+.card {
+  border-radius: 10px;
+  border: 1px solid #ddd;
+  padding: 15px;
+  background-color: #fff;
+}

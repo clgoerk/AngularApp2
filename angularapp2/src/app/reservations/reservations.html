@@ -1,0 +1,56 @@
+<div id="theList" class="container mt-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h2 class="card-title">Reservation List</h2>
+
+      <!-- Header row -->
+      <div class="row font-weight-bold text-center border-bottom pb-2" style="background-color: #f8f9fa;">
+        <div class="col-2">Location</div>
+        <div class="col-2">Start Time</div>
+        <div class="col-2">End Time</div>
+        <div class="col-2">Reserved</div>
+        <div class="col-2">Image</div>
+      </div>
+
+      <!-- Data rows -->
+      <div *ngFor="let item of reservations; let i = index" class="row align-items-center py-2 border-bottom">
+
+        <div class="col-2">
+          <input type="text"
+                 [(ngModel)]="reservations[i].location"
+                 class="form-control"
+                 required />
+        </div>
+
+        <div class="col-2">
+          <input type="time"
+                 [(ngModel)]="reservations[i].start_time"
+                 class="form-control"
+                 required />
+        </div>
+
+        <div class="col-2">
+          <input type="time"
+                 [(ngModel)]="reservations[i].end_time"
+                 class="form-control"
+                 required />
+        </div>
+
+        <div class="col-2">
+          <input type="checkbox"
+                 [(ngModel)]="reservations[i].reserved" />
+          Reserved
+        </div>
+
+        <div class="col-2">
+          <img [src]="'http://localhost/angularapp2/reservationsapi/uploads/' + item.imageName"
+               width="50"
+               height="50"
+               class="img-thumbnail"
+               [alt]="item.imageName" />
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
