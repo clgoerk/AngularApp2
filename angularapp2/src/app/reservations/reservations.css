@@ -17,3 +17,16 @@ h2 {
   padding: 15px;
   background-color: #fff;
 }
+
+/* Center content in each column */
+.row > .col-2 {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+/* Space between Edit and Delete buttons */
+.col-2 input[type="button"] {
+  margin: 0 5px;
+}

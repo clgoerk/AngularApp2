@@ -5,11 +5,12 @@ import { Reservation } from '../reservation';
 import { ReservationService } from '../reservation.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
+import { RouterModule } from '@angular/router';
 
 @Component({
   standalone: true,
   selector: 'app-reservations',
-  imports: [HttpClientModule, CommonModule, FormsModule],
+  imports: [HttpClientModule, CommonModule, FormsModule, RouterModule],
   providers: [ReservationService],
   templateUrl: './reservations.html',
   styleUrls: ['./reservations.css'],
@@ -21,6 +22,7 @@ export class Reservations implements OnInit {
 
   error = '';
   success = '';
+  selectedFile: File | null = null;
 
   constructor(private reservationService: ReservationService, private http: HttpClient, private cdr: ChangeDetectorRef) {}
 
@@ -44,23 +46,79 @@ export class Reservations implements OnInit {
     );
   }
 
-  addReservation(f: NgForm) {
-    if (!this.reservation.location || !this.reservation.start_time || !this.reservation.end_time) {
-      this.error = 'Please fill in all required fields.';
-      return;
-    }
+addReservation(f: NgForm) {
+  this.resetAlerts();
 
-    this.reservationService.add(this.reservation).subscribe(
-      (res) => {
-        this.success = 'Reservation added successfully';
-        this.getReservations();
-        f.resetForm();
-      },
-      (err) => {
-        console.log(err);
-        this.error = 'Failed to add reservation';
-      }
-    );
+  if (this.selectedFile) {
+    this.reservation.imageName = this.selectedFile.name;
+    this.uploadFile(); // uploads the file
+  } else {
+    this.reservation.imageName = ''; // let the backend assign placeholder
+  }
+
+  this.reservationService.add(this.reservation).subscribe(
+    (res: Reservation) => {
+      this.reservations.push(res);
+      this.success = 'Successfully created';
+      f.reset();
+      this.selectedFile = null; // reset file
+    },
+    (err) => (this.error = err.message)
+  );
+}
+
+editReservation(location: any, start_time: any, end_time: any, reserved: boolean, id: any) {
+  this.resetAlerts();
+  this.reservationService.edit({
+    location: location.value,
+    start_time: start_time.value,
+    end_time: end_time.value,
+    reserved: reserved,
+    id: +id
+  }).subscribe(
+    (res) => {
+      this.cdr.detectChanges();
+      this.success = 'Successfully edited';
+    },
+    (err) => {
+      this.error = err.message;
+    }
+  );
+}
+
+deleteReservation(id: number) {
+  console.log('Delete clicked for ID:', id); // <-- Add this
+  this.resetAlerts();
+  this.reservationService.delete(id).subscribe(
+    (res) => {
+      this.reservations = this.reservations.filter(function (item) {
+        return item['id'] && +item['id'] !== +id;
+      });
+      this.cdr.detectChanges();
+      this.success = 'Deleted successfully';
+    },
+    (err) => (this.error = err.message)
+  );
+}
+
+uploadFile(): void {
+  if (!this.selectedFile) {
+    return;
+  }
+  const formData = new FormData();
+  formData.append('image', this.selectedFile);
+
+  this.http.post('http://localhost/angularapp2/reservationsapi/upload', formData).subscribe(
+    response => console.log('File uploaded successfully: ', response),
+    error => console.error('File upload failed: ', error)
+  );
+}
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
   }
 
   resetAlerts(): void {
