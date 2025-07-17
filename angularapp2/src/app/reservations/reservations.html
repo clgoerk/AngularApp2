@@ -1,3 +1,4 @@
+<!---
 <div id="theForm" class="container mt-4">
   <div class="card shadow-sm">
     <div class="card-body">
@@ -5,65 +6,35 @@
       <form #f="ngForm" name="reservationForm" (submit)="addReservation(f)">
 
         <div class="row g-3">
-
           <div class="col-md-2">
             <label class="form-label">Location</label>
-            <input type="text"
-                   class="form-control"
-                   name="location"
-                   [(ngModel)]="reservation.location"
-                   #location="ngModel"
-                   required>
-            <div class="text-danger small" *ngIf="location.invalid && location.touched">
-              Location is required
-            </div>
+            <input type="text" class="form-control" name="location" [(ngModel)]="reservation.location" #location="ngModel" required>
+            <div class="text-danger small" *ngIf="location.invalid && location.touched">Location is required</div>
           </div>
 
           <div class="col-md-2">
             <label class="form-label">Start Time</label>
-            <input type="time"
-                   class="form-control"
-                   name="start_time"
-                   [(ngModel)]="reservation.start_time"
-                   #startTime="ngModel"
-                   required>
-            <div class="text-danger small" *ngIf="startTime.invalid && startTime.touched">
-              Start time is required
-            </div>
+            <input type="time" class="form-control" name="start_time" [(ngModel)]="reservation.start_time" #startTime="ngModel" required>
+            <div class="text-danger small" *ngIf="startTime.invalid && startTime.touched">Start time is required</div>
           </div>
 
           <div class="col-md-2">
             <label class="form-label">End Time</label>
-            <input type="time"
-                   class="form-control"
-                   name="end_time"
-                   [(ngModel)]="reservation.end_time"
-                   #endTime="ngModel"
-                   required>
-            <div class="text-danger small" *ngIf="endTime.invalid && endTime.touched">
-              End time is required
-            </div>
+            <input type="time" class="form-control" name="end_time" [(ngModel)]="reservation.end_time" #endTime="ngModel" required>
+            <div class="text-danger small" *ngIf="endTime.invalid && endTime.touched">End time is required</div>
           </div>
 
           <div class="col-md-2 d-flex align-items-end">
             <div class="form-check">
-              <input class="form-check-input"
-                     type="checkbox"
-                     name="reserved"
-                     [(ngModel)]="reservation.reserved"
-                     id="reservedCheck">
+              <input class="form-check-input" type="checkbox" name="reserved" [(ngModel)]="reservation.reserved" id="reservedCheck">
               <label class="form-check-label" for="reservedCheck">Reserved</label>
             </div>
           </div>
 
           <div class="col-md-4">
             <label class="form-label">Upload Image</label>
-            <input type="file"
-                   class="form-control"
-                   name="imageName"
-                   (change)="onFileSelected($event)">
+            <input type="file" class="form-control" name="imageName" (change)="onFileSelected($event)">
           </div>
-
         </div>
 
         <div class="text-center mt-4">
@@ -74,6 +45,10 @@
     </div>
   </div>
 </div>
+-->
+
+<!-- Page title -->
+<h1 class="text-center mt-4 mb-3">Reservation Manager</h1>
 
 <div id="theList" class="container mt-4">
   <div class="card shadow-sm">
@@ -91,45 +66,15 @@
       </div>
 
       <!-- Data rows -->
-      <div *ngFor="let item of reservations; let i = index" class="row align-items-center py-2 border-bottom">
-
+      <div *ngFor="let item of reservations" class="row align-items-center py-2 border-bottom text-center">
+        <div class="col-2">{{ item.location }}</div>
+        <div class="col-2">{{ formatTime(item.start_time) }}</div>
+        <div class="col-2">{{ formatTime(item.end_time) }}</div>
         <div class="col-2">
-          <input type="text"
-                 [(ngModel)]="reservations[i].location"
-                 class="form-control"
-                 name="location{{i}}"
-                 required
-                 #location="ngModel"
-                 [ngClass]="{ 'is-invalid': location.touched && location.invalid }" />
+          <span [ngClass]="{ 'text-success': item.reserved, 'text-muted': !item.reserved }">
+            {{ item.reserved ? 'Yes' : 'No' }}
+          </span>
         </div>
-
-        <div class="col-2">
-          <input type="time"
-                 [(ngModel)]="reservations[i].start_time"
-                 class="form-control"
-                 name="startTime{{i}}"
-                 required
-                 #startTime="ngModel"
-                 [ngClass]="{ 'is-invalid': startTime.touched && startTime.invalid }" />
-        </div>
-
-        <div class="col-2">
-          <input type="time"
-                 [(ngModel)]="reservations[i].end_time"
-                 class="form-control"
-                 name="endTime{{i}}"
-                 required
-                 #endTime="ngModel"
-                 [ngClass]="{ 'is-invalid': endTime.touched && endTime.invalid }" />
-        </div>
-
-        <div class="col-2">
-          <input type="checkbox"
-                 [(ngModel)]="reservations[i].reserved"
-                 name="reserved{{i}}" />
-          Reserved
-        </div>
-
         <div class="col-2">
           <img [src]="'http://localhost/angularapp2/reservationsapi/uploads/' + item.imageName"
                width="50"
@@ -137,21 +82,19 @@
                class="img-thumbnail"
                [alt]="item.imageName" />
         </div>
-
         <div class="col-2">
-          <input type="button"
-                 value="Edit"
-                 class="btn btn-success btn-sm"
-                 [disabled]="location.invalid || startTime.invalid || endTime.invalid"
-                 (click)="editReservation(location, startTime, endTime, reservations[i].reserved, item.id)">
-
-          <input type="button"
-                 value="Delete"
-                 class="btn btn-danger btn-sm"
-                 (click)="deleteReservation(item.id ? item.id : 0)">
+          <a [routerLink]="['/edit', item.id]" class="btn btn-success btn-sm">Edit</a>
         </div>
-
       </div>
     </div>
   </div>
+</div>
+
+<div id="links">
+  <button class="btn btn-sm btn-primary" routerLink="/add">
+    Add Contact
+  </button>
+  <button class="btn btn-sm btn-primary" routerLink="/about">
+    About Us
+  </button>
 </div>

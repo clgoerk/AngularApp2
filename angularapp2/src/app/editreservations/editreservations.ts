@@ -1,0 +1,88 @@
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { ReservationService } from '../reservation.service';
+import { Reservation } from '../reservation';
+import { FormsModule } from '@angular/forms';
+
+@Component({
+  standalone: true,
+  selector: 'app-editreservations',
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, HttpClientModule, RouterModule],
+  providers: [ReservationService],
+  templateUrl: './editreservations.html',
+  styleUrls: ['./editreservations.css'],
+})
+export class Editreservations implements OnInit {
+  form!: FormGroup;
+  id!: number;
+  originalImageName: string = 'placeholder.jpg';
+  selectedFile: File | null = null;
+
+  constructor(
+    private fb: FormBuilder,
+    private route: ActivatedRoute,
+    private reservationService: ReservationService,
+    private http: HttpClient,
+    private router: Router
+  ) {}
+
+  ngOnInit(): void {
+    this.id = +this.route.snapshot.paramMap.get('id')!;
+    this.buildForm();
+
+    this.reservationService.get(this.id).subscribe({
+      next: (res: any) => {
+        const normalized = {
+          ...res,
+          start_time: res.start_time.slice(0, 5), // e.g., "09:00"
+          end_time: res.end_time.slice(0, 5),     // e.g., "12:00"
+          reserved: res.reserved === '1' || res.reserved === 1
+        };
+
+        this.form.patchValue(normalized);
+        this.originalImageName = res.imageName || 'placeholder.jpg';
+      },
+      error: (err) => console.error('Load failed', err),
+    });
+  }
+
+  buildForm() {
+    this.form = this.fb.group({
+      location: ['', Validators.required],
+      start_time: ['', Validators.required],
+      end_time: ['', Validators.required],
+      reserved: [false],
+    });
+  }
+
+  onFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.files && input.files.length > 0) {
+      this.selectedFile = input.files[0];
+    }
+  }
+
+  onSubmit(): void {
+    if (this.form.invalid) return;
+
+    const formData = new FormData();
+    formData.append('id', this.id.toString());
+    formData.append('location', this.form.value.location);
+    formData.append('start_time', this.form.value.start_time); 
+    formData.append('end_time', this.form.value.end_time);
+    formData.append('reserved', this.form.value.reserved ? '1' : '0');
+    formData.append('originalImageName', this.originalImageName);
+
+    if (this.selectedFile) {
+      formData.append('image', this.selectedFile);
+    }
+
+    this.http.post('http://localhost/angularapp2/reservationsapi/edit.php', formData).subscribe({
+      next: () => this.router.navigate(['/reservations']),
+      error: (err) => console.error('Update failed', err),
+    });
+  }
+}

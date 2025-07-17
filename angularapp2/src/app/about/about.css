@@ -1,5 +1,8 @@
-#about, #links {
-  padding: 10px;
-  border: 2px solid black;
-  margin: 10px;
+#aboutPage {
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+#aboutPage ul {
+  padding-left: 20px;
 }

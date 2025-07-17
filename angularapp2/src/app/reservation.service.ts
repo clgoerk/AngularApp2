@@ -23,6 +23,10 @@ export class ReservationService {
       })
     );
   }
+  
+  get(id: number) {
+    return this.http.get<Reservation>(`http://localhost/angularapp2/reservationsapi/get.php?id=${id}`);
+  }
 
   add(reservation: Reservation) {
     return this.http.post(`${this.baseUrl}/add`, {data: reservation}).pipe(

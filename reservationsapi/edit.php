@@ -1,43 +1,66 @@
 <?php
-  require 'connect.php';
+require 'connect.php';
 
-  // Get the posted data
-  $postdata = file_get_contents("php://input");
+header('Content-Type: application/json');
 
-  if (isset($postdata) && !empty($postdata)) {
-    // Extract the data
-    $request = json_decode($postdata);
+// Get ID
+$id = isset($_POST['id']) ? (int) $_POST['id'] : 0;
+if ($id <= 0) {
+  http_response_code(400);
+  echo json_encode(['error' => 'Invalid ID']);
+  exit;
+}
 
-    // Validate
-    if ((int)$request->data->id < 1 ||
-        trim($request->data->location) === '' ||
-        trim($request->data->start_time) === '' ||
-        trim($request->data->end_time) === '') {
-      return http_response_code(400);
-    }
+// Get values
+$location = $_POST['location'] ?? '';
+$start_time = $_POST['start_time'] ?? '';
+$end_time = $_POST['end_time'] ?? '';
+$reserved = $_POST['reserved'] ?? '0';
+$originalImageName = $_POST['originalImageName'] ?? 'placeholder.jpg';
 
-    // Sanitize
-    $id = mysqli_real_escape_string($con, (int)$request->data->id);
-    $location = mysqli_real_escape_string($con, trim($request->data->location));
-    $start_time = mysqli_real_escape_string($con, trim($request->data->start_time));
-    $end_time = mysqli_real_escape_string($con, trim($request->data->end_time));
-    $reserved = isset($request->data->reserved) ? (int)$request->data->reserved : 0;
-    $imageName = isset($request->data->imageName) ? mysqli_real_escape_string($con, trim($request->data->imageName)) : 'placeholder.jpg';
+$target_dir = "uploads/";
+$imageName = $originalImageName;
 
-    // Update query
-    $sql = "UPDATE `reservations` 
-            SET `location` = '$location', 
-                `start_time` = '$start_time', 
-                `end_time` = '$end_time', 
-                `reserved` = '$reserved', 
-                `imageName` = '$imageName' 
-            WHERE `id` = '$id' 
-            LIMIT 1";
+// Handle image upload
+if (isset($_FILES["image"]) && $_FILES["image"]["error"] == UPLOAD_ERR_OK) {
+  $tmp_name = $_FILES["image"]["tmp_name"];
+  $filename = basename($_FILES["image"]["name"]);
+  $target_file = $target_dir . $filename;
 
-    if (mysqli_query($con, $sql)) {
-      http_response_code(204);
-    } else {
-      http_response_code(422);
+  // Remove old image if it's not the placeholder
+  if ($originalImageName !== 'placeholder.jpg') {
+    $oldPath = $target_dir . $originalImageName;
+    if (file_exists($oldPath)) {
+      unlink($oldPath); // delete old image
     }
   }
-?>
+
+  // Upload new image
+  if (move_uploaded_file($tmp_name, $target_file)) {
+    $imageName = $filename;
+  }
+}
+
+// Update reservation
+$sql = "UPDATE reservations 
+        SET location = ?, start_time = ?, end_time = ?, reserved = ?, imageName = ? 
+        WHERE id = ?";
+
+$stmt = $con->prepare($sql);
+if ($stmt === false) {
+  http_response_code(500);
+  echo json_encode(['error' => 'Failed to prepare statement']);
+  exit;
+}
+
+$stmt->bind_param("sssssi", $location, $start_time, $end_time, $reserved, $imageName, $id);
+
+if ($stmt->execute()) {
+  echo json_encode(['success' => true]);
+} else {
+  http_response_code(500);
+  echo json_encode(['error' => 'Failed to update']);
+}
+
+$stmt->close();
+$con->close();

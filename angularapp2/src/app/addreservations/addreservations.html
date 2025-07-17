@@ -1,0 +1,72 @@
+<div class="container">
+  <h2>Add Reservation</h2>
+
+  <form #f="ngForm" (ngSubmit)="addReservation(f)" enctype="multipart/form-data" novalidate>
+    <div class="form-group">
+      <label>Location</label>
+      <input
+        type="text"
+        class="form-control"
+        name="location"
+        [(ngModel)]="reservation.location"
+        #location="ngModel"
+        required
+      />
+      <div class="text-danger small" *ngIf="location.invalid && location.touched">
+        Location is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>Start Time</label>
+      <input
+        type="time"
+        class="form-control"
+        name="start_time"
+        [(ngModel)]="reservation.start_time"
+        #startTime="ngModel"
+        required
+      />
+      <div class="text-danger small" *ngIf="startTime.invalid && startTime.touched">
+        Start time is required
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label>End Time</label>
+      <input
+        type="time"
+        class="form-control"
+        name="end_time"
+        [(ngModel)]="reservation.end_time"
+        #endTime="ngModel"
+        required
+      />
+      <div class="text-danger small" *ngIf="endTime.invalid && endTime.touched">
+        End time is required
+      </div>
+    </div>
+
+    <div class="form-check mb-3">
+      <input
+        type="checkbox"
+        class="form-check-input"
+        id="reservedCheck"
+        [(ngModel)]="reservation.reserved"
+        name="reserved"
+      />
+      <label class="form-check-label" for="reservedCheck">Reserved</label>
+    </div>
+
+    <div class="form-group">
+      <label>Upload Image</label>
+      <input type="file" class="form-control" (change)="onFileSelected($event)" />
+    </div>
+
+    <div class="button-group text-center mt-4">
+      <button type="submit" class="btn btn-primary" [disabled]="f.invalid">Add Reservation</button>
+      <button type="button" class="btn btn-secondary" (click)="router.navigate(['/reservations'])">Cancel</button>
+    </div>
+  </form>
+</div>
+

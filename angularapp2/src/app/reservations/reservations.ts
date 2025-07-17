@@ -18,13 +18,23 @@ import { RouterModule } from '@angular/router';
 export class Reservations implements OnInit {
   title = 'ReservationManager';
   public reservations: Reservation[] = [];
-  reservation: Reservation = { location: '', start_time: '', end_time: '', reserved: false, imageName: '' };
+  reservation: Reservation = {
+    location: '',
+    start_time: '',
+    end_time: '',
+    reserved: false,
+    imageName: ''
+  };
 
   error = '';
   success = '';
   selectedFile: File | null = null;
 
-  constructor(private reservationService: ReservationService, private http: HttpClient, private cdr: ChangeDetectorRef) {}
+  constructor(
+    private reservationService: ReservationService,
+    private http: HttpClient,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit(): void {
     this.getReservations();
@@ -46,73 +56,53 @@ export class Reservations implements OnInit {
     );
   }
 
-addReservation(f: NgForm) {
-  this.resetAlerts();
+  addReservation(f: NgForm) {
+    this.resetAlerts();
 
-  if (this.selectedFile) {
-    this.reservation.imageName = this.selectedFile.name;
-    this.uploadFile(); // uploads the file
-  } else {
-    this.reservation.imageName = ''; // let the backend assign placeholder
-  }
-
-  this.reservationService.add(this.reservation).subscribe(
-    (res: Reservation) => {
-      this.reservations.push(res);
-      this.success = 'Successfully created';
-      f.reset();
-      this.selectedFile = null; // reset file
-    },
-    (err) => (this.error = err.message)
-  );
-}
-
-editReservation(location: any, start_time: any, end_time: any, reserved: boolean, id: any) {
-  this.resetAlerts();
-  this.reservationService.edit({
-    location: location.value,
-    start_time: start_time.value,
-    end_time: end_time.value,
-    reserved: reserved,
-    id: +id
-  }).subscribe(
-    (res) => {
-      this.cdr.detectChanges();
-      this.success = 'Successfully edited';
-    },
-    (err) => {
-      this.error = err.message;
+    if (this.selectedFile) {
+      this.reservation.imageName = this.selectedFile.name;
+      this.uploadFile();
+    } else {
+      this.reservation.imageName = '';
     }
-  );
-}
 
-deleteReservation(id: number) {
-  console.log('Delete clicked for ID:', id); // <-- Add this
-  this.resetAlerts();
-  this.reservationService.delete(id).subscribe(
-    (res) => {
-      this.reservations = this.reservations.filter(function (item) {
-        return item['id'] && +item['id'] !== +id;
-      });
-      this.cdr.detectChanges();
-      this.success = 'Deleted successfully';
-    },
-    (err) => (this.error = err.message)
-  );
-}
-
-uploadFile(): void {
-  if (!this.selectedFile) {
-    return;
+    this.reservationService.add(this.reservation).subscribe(
+      (res: Reservation) => {
+        this.reservations.push(res);
+        this.success = 'Successfully created';
+        f.reset();
+        this.selectedFile = null;
+      },
+      (err) => (this.error = err.message)
+    );
   }
-  const formData = new FormData();
-  formData.append('image', this.selectedFile);
 
-  this.http.post('http://localhost/angularapp2/reservationsapi/upload', formData).subscribe(
-    response => console.log('File uploaded successfully: ', response),
-    error => console.error('File upload failed: ', error)
-  );
-}
+  deleteReservation(id: number) {
+    console.log('Delete clicked for ID:', id);
+    this.resetAlerts();
+    this.reservationService.delete(id).subscribe(
+      (res) => {
+        this.reservations = this.reservations.filter((item) => {
+          return item['id'] && +item['id'] !== +id;
+        });
+        this.cdr.detectChanges();
+        this.success = 'Deleted successfully';
+      },
+      (err) => (this.error = err.message)
+    );
+  }
+
+  uploadFile(): void {
+    if (!this.selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('image', this.selectedFile);
+
+    this.http.post('http://localhost/angularapp2/reservationsapi/upload', formData).subscribe(
+      (response) => console.log('File uploaded successfully: ', response),
+      (error) => console.error('File upload failed: ', error)
+    );
+  }
 
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -124,6 +114,15 @@ uploadFile(): void {
   resetAlerts(): void {
     this.error = '';
     this.success = '';
+  }
+
+  formatTime(time: string): string {
+    if (!time) return '';
+    const [hourStr, minute] = time.split(':');
+    let hour = parseInt(hourStr, 10);
+    const ampm = hour >= 12 ? 'PM' : 'AM';
+    hour = hour % 12 || 12;
+    return `${hour}:${minute} ${ampm}`;
   }
 }
  
