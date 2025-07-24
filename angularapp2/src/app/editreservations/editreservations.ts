@@ -1,11 +1,11 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ChangeDetectorRef } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ReservationService } from '../reservation.service';
-import { Reservation } from '../reservation';
 import { FormsModule } from '@angular/forms';
+import { Auth } from '../services/auth';
 
 @Component({
   standalone: true,
@@ -20,16 +20,28 @@ export class Editreservations implements OnInit {
   id!: number;
   originalImageName: string = 'placeholder.jpg';
   selectedFile: File | null = null;
+  previewUrl: string = '';
+  userName = '';
+  error = '';
+  success = '';
 
   constructor(
     private fb: FormBuilder,
     private route: ActivatedRoute,
     private reservationService: ReservationService,
+    public authService: Auth,
     private http: HttpClient,
-    private router: Router
+    private router: Router,
+    private cdr: ChangeDetectorRef
   ) {}
 
   ngOnInit(): void {
+    if (!this.authService.getAuth()) {
+      this.router.navigate(['/login']);
+      return;
+    }
+
+    this.userName = localStorage.getItem('username') || 'Guest';
     this.id = +this.route.snapshot.paramMap.get('id')!;
     this.buildForm();
 
@@ -37,15 +49,19 @@ export class Editreservations implements OnInit {
       next: (res: any) => {
         const normalized = {
           ...res,
-          start_time: res.start_time.slice(0, 5), // e.g., "09:00"
-          end_time: res.end_time.slice(0, 5),     // e.g., "12:00"
+          start_time: res.start_time.slice(0, 5),
+          end_time: res.end_time.slice(0, 5),
           reserved: res.reserved === '1' || res.reserved === 1
         };
 
         this.form.patchValue(normalized);
         this.originalImageName = res.imageName || 'placeholder.jpg';
       },
-      error: (err) => console.error('Load failed', err),
+      error: (err) => {
+        this.error = 'Failed to load reservation.';
+        this.success = '';
+        this.cdr.detectChanges();
+      },
     });
   }
 
@@ -62,16 +78,21 @@ export class Editreservations implements OnInit {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
       this.selectedFile = input.files[0];
+      this.previewUrl = URL.createObjectURL(this.selectedFile);
     }
   }
 
   onSubmit(): void {
     if (this.form.invalid) return;
 
+    this.error = '';
+    this.success = '';
+    this.cdr.detectChanges();
+
     const formData = new FormData();
     formData.append('id', this.id.toString());
     formData.append('location', this.form.value.location);
-    formData.append('start_time', this.form.value.start_time); 
+    formData.append('start_time', this.form.value.start_time);
     formData.append('end_time', this.form.value.end_time);
     formData.append('reserved', this.form.value.reserved ? '1' : '0');
     formData.append('originalImageName', this.originalImageName);
@@ -81,8 +102,16 @@ export class Editreservations implements OnInit {
     }
 
     this.http.post('http://localhost/angularapp2/reservationsapi/edit.php', formData).subscribe({
-      next: () => this.router.navigate(['/reservations']),
-      error: (err) => console.error('Update failed', err),
+      next: () => {
+        this.success = 'Reservation updated successfully';
+        this.error = '';
+        this.cdr.detectChanges();
+      },
+      error: (err) => {
+        this.error = err.error?.error || 'Failed to update reservation';
+        this.success = '';
+        this.cdr.detectChanges();
+      },
     });
   }
 }

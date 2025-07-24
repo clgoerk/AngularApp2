@@ -50,6 +50,12 @@
 <!-- Page title -->
 <h1 class="text-center mt-4 mb-3">Reservation Manager</h1>
 
+<!-- User toolbar -->
+<div class="welcome-bar">
+  <span class="welcome-msg">Welcome, {{ userName }}</span>
+  <button class="btn btn-sm btn-danger" (click)="authService.logout()">Logout</button>
+</div>
+
 <div id="theList" class="container mt-4">
   <div class="card shadow-sm">
     <div class="card-body">
@@ -92,7 +98,7 @@
 
 <div id="links">
   <button class="btn btn-sm btn-primary" routerLink="/add">
-    Add Contact
+    Add Reservation
   </button>
   <button class="btn btn-sm btn-primary" routerLink="/about">
     About Us

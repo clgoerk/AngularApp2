@@ -1,5 +1,18 @@
+<div class="welcome-bar">
+  <span class="welcome-msg">Welcome, {{ userName }}</span>
+  <button class="btn btn-sm btn-danger" (click)="authService.logout()">Logout</button>
+</div>
+
 <div class="container">
   <h2>Add Reservation</h2>
+
+  <!-- ✅ Alert Messages -->
+  <div *ngIf="error" class="alert alert-danger mt-2 mb-3">
+    {{ error }}
+  </div>
+  <div *ngIf="success" class="alert alert-success mt-2 mb-3">
+    {{ success }}
+  </div>
 
   <form #f="ngForm" (ngSubmit)="addReservation(f)" enctype="multipart/form-data" novalidate>
     <div class="form-group">

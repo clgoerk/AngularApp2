@@ -6,6 +6,7 @@ import { ReservationService } from '../reservation.service';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { ChangeDetectorRef } from '@angular/core';
 import { RouterModule } from '@angular/router';
+import { Auth } from '../services/auth'; // Adjust path if needed
 
 @Component({
   standalone: true,
@@ -29,15 +30,19 @@ export class Reservations implements OnInit {
   error = '';
   success = '';
   selectedFile: File | null = null;
+  userName = '';
 
   constructor(
     private reservationService: ReservationService,
     private http: HttpClient,
-    private cdr: ChangeDetectorRef
+    private cdr: ChangeDetectorRef,
+    public authService: Auth // ✅ Add this
   ) {}
 
   ngOnInit(): void {
     this.getReservations();
+    this.userName = localStorage.getItem('username') || 'Guest';
+    this.cdr.detectChanges();
   }
 
   getReservations(): void {
