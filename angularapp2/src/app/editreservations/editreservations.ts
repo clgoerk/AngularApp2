@@ -77,8 +77,20 @@ export class Editreservations implements OnInit {
   onFileSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
     if (input.files && input.files.length > 0) {
-      this.selectedFile = input.files[0];
-      this.previewUrl = URL.createObjectURL(this.selectedFile);
+      const file = input.files[0];
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+
+      if (!allowedTypes.includes(file.type)) {
+        this.error = 'Only image files are allowed (JPG, PNG, GIF, WEBP)';
+        this.success = '';
+        this.selectedFile = null;
+        this.previewUrl = '';
+        this.cdr.detectChanges();
+        return;
+      }
+
+      this.selectedFile = file;
+      this.previewUrl = URL.createObjectURL(file);
     }
   }
 

@@ -39,9 +39,11 @@
 ## 5. File Upload Tests
 - ✅ Upload a supported image (e.g., .jpg, .png) — confirm it shows up correctly.  
   _**Status:** Done — Working_
-- ⚠️ Try to upload a non-image file (e.g., .txt) — confirm it is rejected or not shown.  
-  _**Status:** Done — It accepts invalid file types_  
-  _**Action:** Do not allow invalid file types_
+- ✅ Try to upload a non-image file (e.g., .txt) — confirm it is rejected or not shown.  
+  _**Status:** Done — Now prevents invalid file types_  
+  _**Behavior:** Displays a warning if a non-image file is selected. If the user continues to submit:_
+  - _For new reservations: `placeholder.jpg` is used instead._
+  - _For edits: the original image is kept._
 - ✅ Add a reservation without uploading an image — confirm placeholder is used.  
   _**Status:** Done — Working_
 
@@ -60,17 +62,16 @@
 ---
 
 ## 7. Duplicate Entry Tests
-- ⚠️ Attempt to add a reservation with the same location, start time, and end time as an existing one — confirm it is:
-  - ❌ Rejected (if duplicates are not allowed), or
-  - ✅ Accepted (if duplicates are allowed)  
-  _**Status:** Done — It accepts duplicate entries_  
-  _**Action:** Do not allow duplicate entries_
-- ⚠️ Try submitting a reservation where only the image or “reserved” status differs from an existing entry — verify if it’s treated as a duplicate.
- _**Status:** Done - It accepts this entry_
- _**Action:** Make this situation a duplicate entry_
-- ⚠️ Edit an existing reservation to match another reservation’s time/location — confirm expected behavior.
- _**Status:** Done - It will allow duplicate times_
- _**Action** Do not allow entries of same location and time_
-- ⚠️ Confirm the app shows an error message or alert if duplicate prevention is in place.
- _**Status** Done - No message displays as duplicate prevention is not in place_
- _**Action** Add duplicate prevention in all areas here and above_
+
+- ✅ **Attempt to add a reservation with the same location, start time, and end time as an existing one**  
+  _**Status:** Duplicate is now correctly **rejected**_  
+  _**Action:** ✅ Implemented_
+- ✅ **Try submitting a reservation where only the image or “reserved” status differs from an existing entry**  
+  _**Status:** Treated as duplicate and rejected_  
+  _**Action:** ✅ Implemented_
+- ✅ **Edit an existing reservation to match another reservation’s time/location**  
+  _**Status:** Prevents overlap by rejecting the change_  
+  _**Action:** ✅ Implemented_
+- ✅ **Confirm the app shows an error message or alert if duplicate prevention is in place**  
+  _**Status:** Duplicate attempts trigger a visible error message in the app UI_  
+  _**Action:** ✅ Implemented_

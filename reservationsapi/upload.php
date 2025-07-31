@@ -1,30 +1,42 @@
 <?php
-  session_start();
+session_start();
 
-  header('Content-Type: application/json');
-  ini_set('display_errors', 1);
-  ini_set('display_startup_errors', 1);
-  error_reporting(E_ALL);
+header('Content-Type: application/json');
+ini_set('display_errors', 1);
+ini_set('display_startup_errors', 1);
+error_reporting(E_ALL);
 
-  require 'connect.php';
+require 'connect.php';
 
-  // Handle image upload
-  if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
-    $uploadDir = 'uploads/';
-    $originalFileName = basename($_FILES['image']['name']);
+if (isset($_FILES['image']) && $_FILES['image']['error'] === UPLOAD_ERR_OK) {
+  $uploadDir = 'uploads/';
+  $originalFileName = basename($_FILES['image']['name']);
+  $fileTmpPath = $_FILES['image']['tmp_name'];
 
-    // Generate a new file name with "Main"
-    $newFileName = $originalFileName;
-    $targetFilePath = $uploadDir . $newFileName;
+  // Validate MIME type
+  $allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+  $mimeType = mime_content_type($fileTmpPath);
 
-    // Save the new image to the uploads directory
-    if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFilePath)) {
-      // no code required
-    } else {
-      http_response_code(500);
-      echo json_encode(['message' => 'Failed to upload image']);
-    }
+  // Validate extension
+  $allowedExtensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
+  $fileExtension = strtolower(pathinfo($originalFileName, PATHINFO_EXTENSION));
 
-    exit; // Exit after handling image
+  if (!in_array($mimeType, $allowedMimeTypes) || !in_array($fileExtension, $allowedExtensions)) {
+    http_response_code(400);
+    echo json_encode(['message' => 'Only image files (jpg, png, gif, webp) are allowed.']);
+    exit;
   }
+
+  // Use original file name (no renaming)
+  $targetFilePath = $uploadDir . $originalFileName;
+
+  if (move_uploaded_file($fileTmpPath, $targetFilePath)) {
+    echo json_encode(['message' => 'Image uploaded successfully']);
+  } else {
+    http_response_code(500);
+    echo json_encode(['message' => 'Failed to upload image']);
+  }
+
+  exit;
+}
 ?>
